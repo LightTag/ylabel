@@ -40,6 +40,7 @@ export const ExampleList = (props) => {
         return (
             <Grid item xs={12} style={{ ...style,  }} key={key} >
                 <Example
+                    handleUpdateExample={props.handleUpdateExample}
                     extraStyle={{ style }}
                     orderIndex={1}
                     key={example.id}
@@ -78,6 +79,11 @@ export const SearchableExampleList =(props)=>{
     const [examples,setExamples] = React.useState(db.allDocs())
     const [lastQuery,setlastQuery] = React.useState(null);
     const [searching,setSearching] = React.useState(false)
+    const handleUpdateExample = ()=>{
+        // Hack to update the examples once a class has been applied. Need to find a more performant way to do this. 
+        handleQueryChange(lastQuery)
+    }
+
     React.useEffect(()=>handleQueryChange(lastQuery),[db.step])
     const handleQueryChange = (query)=>{
         if (!query || query.length <1){
@@ -89,8 +95,6 @@ export const SearchableExampleList =(props)=>{
         }else{
             setSearching(true)
             db.search(query).then(results=>{
-                debugger;
-                
                 setExamples(results);
                 setSearching(false)
     
@@ -98,13 +102,14 @@ export const SearchableExampleList =(props)=>{
 
     
         }
+        setlastQuery(query)
     }
  return (
      <React.Fragment>
 
             <SearchBar onChange={handleQueryChange}/>  
             {searching ? <CircularProgress/> : null}
-            <ExampleList examples={examples}/>
+            <ExampleList examples={examples} handleUpdateExample={handleUpdateExample}/>
 
      </React.Fragment>
 )

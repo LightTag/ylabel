@@ -72,10 +72,6 @@ export const DBContext = (props)=>{
     return (
         <DBContextType.Provider value={api}>
             {ready ? props.children : null}
-            <Fab
-                style={{position:'absolute',top:10,right:10}}
-                onClick={resetIndex}
-            ><ClearAll/></Fab>
         </DBContextType.Provider>
     )
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import { TextField, Fade, MenuItem, Select, FormControl, Button } from '@material-ui/core';
+import { TextField, Fade, MenuItem, Select, FormControl, Button, CircularProgress } from '@material-ui/core';
 
 import { useDB } from '../../db/dbContext.dexie';
 const uuidv4 = require('uuid/v4');
@@ -40,6 +40,7 @@ export const DataIngestor = (props) => {
     const [data, setData] = React.useState(null)
     const [keys, setKeys] = React.useState([]);
     const [textField, setTextField] = React.useState(null)
+    const [loading,setLoading] = React.useState(false)
     const db = useDB()
     const handleNewData = (data) => {
         setKeys(Object.keys(data[0]));
@@ -47,10 +48,13 @@ export const DataIngestor = (props) => {
     }
 
     const handleSubmit = () => {
+        setLoading(true)
         const formtedData = data.map((x, id) => ({
             content: x[textField]
         }))
-        db.addDocsBatch(formtedData);
+        db.addDocsBatch(formtedData)
+        .then(()=>setLoading(false))
+        ;
     }
     return (
         <form>
@@ -71,6 +75,7 @@ export const DataIngestor = (props) => {
                     ))}
                 </TextField>
             </Fade>
+            {loading ? <CircularProgress /> : 
             <Button
                 onClick={handleSubmit}
                 disabled={textField === null}
@@ -79,6 +84,7 @@ export const DataIngestor = (props) => {
             >
                 Load Data
                 </Button>
+            }
         </form>
     )
 }

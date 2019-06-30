@@ -1,14 +1,24 @@
 import React from 'react'
+import { addSchemaClass, getSchemaClasses } from '../db/dexiewDB';
 
 var randomMC = require('random-material-color');
 
 const ClassContextType = React.createContext('classContext')
 export const ClassContext = (props)=>{
 
+
     const [classes,setClasses] = React.useState({});
-    const addClass =(name)=>{
-        classes[name] = { name,color:randomMC.getColor({text:name})};
-        setClasses({...classes});
+    React.useEffect( async ()=>{
+        const classes =await getSchemaClasses()
+        setClasses(classes);
+
+    },[1])
+    
+    const addClass = async (name,)=>{
+        const color =randomMC.getColor({text:name});
+        await addSchemaClass(name,color)
+        const classes =await getSchemaClasses()
+        setClasses(classes);
     }
 
     return (

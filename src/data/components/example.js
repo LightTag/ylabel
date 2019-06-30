@@ -21,7 +21,7 @@ export const Example = (props)=>{
             </Typography>
             </CardContent>
             <CardActions>
-                <ClassRibbon />
+                <ClassRibbon example={props.example} handleUpdateExample={props.handleUpdateExample}/>
             </CardActions>
         </Paper>
     )
