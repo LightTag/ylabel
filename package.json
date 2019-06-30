@@ -1,0 +1,41 @@
+{
+  "name": "ylabel",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "^4.0.0-rc.0",
+    "@material-ui/icons": "^4.2.1",
+    "@tensorflow/tfjs": "^1.2.2",
+    "dexie": "^2.0.4",
+    "elasticlunr": "^0.9.5",
+    "random-material-color": "^1.0.5",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "3.0.1",
+    "react-virtualized": "^9.20.0",
+    "use-debounce": "^2.1.0",
+    "uuid": "^3.3.2",
+    "workerize-loader": "^1.0.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
