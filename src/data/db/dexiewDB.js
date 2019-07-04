@@ -16,11 +16,22 @@ stores[DATA_SCHEMA] ="++id,human_label,model_label,*contentWords"
 stores[CLASS_SCHEMA]="++id,name"
 
 const getTrigrams =(text)=>{
-    let end= 2;
     let trigrams = new Set()
     for (let end=2; end <text.length; end++){
-        trigrams.add(text.slice(end-2,end))
+        trigrams.add(text.slice(end-2,end+1))
     }
+    return Array.from(trigrams)
+
+}
+const getTrigramsForQuery =(text)=>{
+    //To query we don't need all the trigrams, we can take them sequentially
+    
+    let trigrams = new Set()
+    for (let end=2; end <text.length+1; end+=3){
+        const tg = text.slice(end-2,end+1)
+        trigrams.add(tg)
+    }
+    debugger;
     return Array.from(trigrams)
 
 }
@@ -87,7 +98,11 @@ export const search = async (query)=>{
         return a.filter(k => set.has(k));
     });
     debugger;
-    const result = db[DATA_SCHEMA].where("id").anyOf(allMatch).toArray();
+    let result = db[DATA_SCHEMA].where("id").anyOf(allMatch).toArray().then(arr=>{
+        return  arr.filter(doc=>doc.content.search(query) !==-1)
+    });
+    // Finnaly, filter to find the exact query
+    
     return result
 }
 

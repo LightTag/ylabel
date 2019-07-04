@@ -12,7 +12,7 @@ export const DBContext = (props)=>{
     const [ready,setReady] = React.useState(false)
 
     const incrementStep = ()=>setStep(step+1) // trigger a rerender when modifying the db
-    const init = async ()=>{
+    const init =  ()=>{
 
         setReady(true)
     

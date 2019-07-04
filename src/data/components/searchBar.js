@@ -1,14 +1,14 @@
 import React from 'react'
-import { TextField, IconButton } from '@material-ui/core';
-import {Search} from '@material-ui/icons'
+import { TextField, LinearProgress } from '@material-ui/core';
 import { useDebouncedCallback } from 'use-debounce';
+import { useSearch } from '../searchContext';
 
 export const SearchBar = (props)=>{
-    const [query,setQuery] = React.useState(null);
+    const search = useSearch()
     const [debouncedCallback] = useDebouncedCallback(
         // function
         (query) => {
-            props.onChange(query)
+            search.handleQueryChange(query)
         },
         // delay in ms
         250
@@ -19,10 +19,10 @@ export const SearchBar = (props)=>{
         <TextField 
             type="text"
             label="Search for something"
-            helperText="Runs a full text search on your data"
+            helperText={search.searching ? <LinearProgress /> : "Runs a full text search on your data" }
             onChange={e=>{debouncedCallback(e.target.value)}}
+            fullWidth
         />
-        <IconButton onClick={()=>props.onChange(query)} > <Search/> </IconButton>
 </React.Fragment>
     )
 }

@@ -7,6 +7,7 @@ import { List } from 'react-virtualized'
 import { useDB } from '../db/dbContext.dexie';
 import { Example } from './example';
 import { SearchBar } from './searchBar';
+import { useSearch } from '../searchContext';
 const useStyles = makeStyles(theme => ({
     root: {
         '&:focus': {
@@ -22,6 +23,7 @@ const useStyles = makeStyles(theme => ({
 export const ExampleList = (props) => {
     const [height, setHeight] = React.useState(0);
     const [width, setWidth] = React.useState(0);
+    const search = useSearch()
     const ref = React.useCallback(node => {
         if (node !== null && height === 0) {
 
@@ -29,7 +31,7 @@ export const ExampleList = (props) => {
             setWidth(node.clientWidth);
         }
     })
-    const examples = props.examples;
+    const examples = search.examples;
 
     const maxHeight = examples.length > 1 ? height / 3 : height * 2 / 3
     const rowHeight = examples.length > 1 ? maxHeight * 2 : height

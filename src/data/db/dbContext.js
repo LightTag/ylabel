@@ -13,24 +13,29 @@ export const DBContext = (props)=>{
     const [ready,setReady] = React.useState(false)
 
     const incrementStep = ()=>setStep(step+1) // trigger a rerender when modifying the db
-    const init = async ()=>{
-        const cachedIndex = await getIndex()
-        if (cachedIndex){
-            dbRef.current =     elasticlunr.Index.load(cachedIndex)
-        }else{
-            dbRef.current = elasticlunr( function(){
-                this.addField('content')
-                this.setRef('id')
-                this.addField('userLabel')
-                this.addField('modelLabel')
-                this.addField('modelConf')
-            })
-    
-        }
+    const init =  ()=>{
+            getIndex().then(cachedIndex =>{
+                if (cachedIndex){
+                    dbRef.current =     elasticlunr.Index.load(cachedIndex)
+                }else{
+                    dbRef.current = elasticlunr( function(){
+                        this.addField('content')
+                        this.setRef('id')
+                        this.addField('userLabel')
+                        this.addField('modelLabel')
+                        this.addField('modelConf')
+                    })
+            
+                }
+        
+                setReady(true)
+        
+          }
 
-        setReady(true)
+        )
     
     }
+    
     React.useEffect(init,[1])
 
     const api = {

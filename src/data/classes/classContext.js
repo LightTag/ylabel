@@ -8,9 +8,11 @@ export const ClassContext = (props)=>{
 
 
     const [classes,setClasses] = React.useState({});
-    React.useEffect( async ()=>{
-        const classes =await getSchemaClasses()
-        setClasses(classes);
+    React.useEffect( ()=>{
+        getSchemaClasses().then(classes=>{
+            setClasses(classes);
+
+        })
 
     },[1])
     

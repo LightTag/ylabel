@@ -14,7 +14,6 @@ export const ResetDBModal =(props)=>{
     return (
         <React.Fragment>
             <Fab
-                style={{position:'absolute',top:10,left:10}}
                 onClick={()=>setOpen(true)}
             ><ClearAll/></Fab>
 
