@@ -1,13 +1,13 @@
 import React from 'react'
-import { Fab, DialogTitle, Dialog, DialogActions, Button, CircularProgress, IconButton } from '@material-ui/core';
-import { resetIndex } from '../../db/indexCache';
+import {  DialogTitle, Dialog, DialogActions, Button, CircularProgress, IconButton } from '@material-ui/core';
 import { DeleteForever } from '@material-ui/icons';
+import { resetAll } from '../../db/dexiewDB';
 export const ResetDBModal =(props)=>{
     const [open,setOpen] = React.useState(false);
     const [erasing,setErasing] = React.useState(false)
     const handleClick = async ()=>{
         setErasing(true)
-        await resetIndex();
+        await resetAll();
         setOpen(false)
         setErasing(false)
     }

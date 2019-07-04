@@ -1,8 +1,8 @@
 import React from 'react'
 import { useClassContext } from './classContext';
-import { Grid, Button, IconButton, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@material-ui/core';
+import { Grid, Button,  Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
-import { applyClassToExample } from '../db/dexiewDB';
+import { useDB } from '../db/dbContext.dexie';
 
 export const AddClassDialog = (props)=>{
     const classContext =useClassContext()
@@ -44,11 +44,11 @@ export const AddClassDialog = (props)=>{
     )
 }
 export const ClassRibbon = (props)=>{
+    const db = useDB()
     const classContext =useClassContext()
     const applyClass =(name)=>{
         debugger;
-        applyClassToExample(props.example.id,name)
-        .then(props.handleUpdateExample)
+        db.setDocCLass(props.example.id,name)
     }
     return(
     <Grid container spacing={2}>
@@ -56,7 +56,7 @@ export const ClassRibbon = (props)=>{
         {classContext.classes.map(cls=>(
             <Grid item>
             <Button 
-                variant={props.example.human_label==cls.name ? "contained" : "outlined"}
+                variant={props.example.human_label===cls.name ? "contained" : "outlined"}
                 onClick={()=>{applyClass(cls.name)}}
                 style={{borderColor:cls.color,background:props.example.human_label===cls.name ? cls.color : undefined}}>
                 {cls.name}

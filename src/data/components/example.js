@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography, Paper, CardHeader, CardContent, CardActionArea, CardActions } from '@material-ui/core';
+import { Typography, Paper, CardHeader, CardContent,  CardActions } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { ClassRibbon } from '../classes/classRibbon';
 const useStyles = makeStyles(theme=>({

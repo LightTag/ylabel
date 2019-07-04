@@ -1,9 +1,5 @@
 import React from 'react'
-import { getIndex, updateIndex,resetIndex } from './indexCache';
-import { Fab } from '@material-ui/core';
-import { ClearAll } from '@material-ui/icons';
 import * as dbUtils from './dexiewDB'
-var elasticlunr = require('elasticlunr');
 
 const DBContextType = React.createContext("dbContext");
 
@@ -26,22 +22,32 @@ export const DBContext = (props)=>{
         },
         addDocsBatch: async (docs)=>{
             const result = await dbUtils.addData(docs)
+            return result
         },
         updateDoc:(doc)=>{
             // dbUtils.updateDoc(doc)
             incrementStep();
         },
+        setDocCLass: (exampleId,className)=>{
+            dbUtils.applyClassToExample(exampleId,className)
+            .then(incrementStep)
+            
+        },
         updateDocsBatch:(docs)=>{
-            for (const doc of docs){
-                // dbRef.current.updateDoc(doc)
-            }
+            // for (const doc of docs){
+            //     // dbRef.current.updateDoc(doc)
+            // }
             incrementStep();
         },
         search:  async (query,params)=>{
             const results = await dbUtils.search(query)
-            debugger;
             return  results
         },
+        regexSearch:  async (pattern,)=>{
+            const results = await dbUtils.regexSearch(pattern)
+            return  results
+        },
+
         allDocs:()=>{
 
             return dbUtils.first(20)

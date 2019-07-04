@@ -2,11 +2,9 @@
 It starts by showing the first N examples, without mounting the rest. As the user scrolls comonents are mounted and unmounted
 */
 import React from 'react'
-import { makeStyles, Grid, Container, CircularProgress, } from '@material-ui/core';
+import { makeStyles, Grid, Container,  } from '@material-ui/core';
 import { List } from 'react-virtualized'
-import { useDB } from '../db/dbContext.dexie';
 import { Example } from './example';
-import { SearchBar } from './searchBar';
 import { useSearch } from '../searchContext';
 const useStyles = makeStyles(theme => ({
     root: {
@@ -76,43 +74,3 @@ export const ExampleList = (props) => {
 }
 
 
-export const SearchableExampleList =(props)=>{
-    const db = useDB();
-    const [examples,setExamples] = React.useState(db.allDocs())
-    const [lastQuery,setlastQuery] = React.useState(null);
-    const [searching,setSearching] = React.useState(false)
-    const handleUpdateExample = ()=>{
-        // Hack to update the examples once a class has been applied. Need to find a more performant way to do this. 
-        handleQueryChange(lastQuery)
-    }
-
-    React.useEffect(()=>handleQueryChange(lastQuery),[db.step])
-    const handleQueryChange = (query)=>{
-        if (!query || query.length <1){
-            db.allDocs().then(results=>{
-
-                setExamples(results)
-            })
-            
-        }else{
-            setSearching(true)
-            db.search(query).then(results=>{
-                setExamples(results);
-                setSearching(false)
-    
-            })
-
-    
-        }
-        setlastQuery(query)
-    }
- return (
-     <React.Fragment>
-
-            <SearchBar onChange={handleQueryChange}/>  
-            {searching ? <CircularProgress/> : null}
-            <ExampleList examples={examples} handleUpdateExample={handleUpdateExample}/>
-
-     </React.Fragment>
-)
- }

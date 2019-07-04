@@ -10,9 +10,15 @@ export const SearchContext = (props)=>{
     const [searching,setSearching] = React.useState(false)
 
     React.useEffect(()=>{
+        // This runs the last query when something happens in the db. 
+        // E.g. if we apply a class we refresh the data
+        // Lots of potential for UX bugs
+        //TODO improve this
         handleQueryChange(lastQuery)
     },[db.step])
-    const handleQueryChange = (query)=>{
+    const handleQueryChange = (query,regex=false)=>{
+        
+        const searchFunction = regex ? db.regexSearch : db.search
         if (!query || query.length <1){
             db.allDocs().then(results=>{
 
@@ -21,7 +27,7 @@ export const SearchContext = (props)=>{
             
         }else{
             setSearching(true)
-            db.search(query).then(results=>{
+            searchFunction(query).then(results=>{
                 setExamples(results);
                 setSearching(false)
     

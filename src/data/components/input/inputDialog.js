@@ -1,5 +1,5 @@
 import React from 'react'
-import { DialogTitle, Dialog, DialogContent, IconButton, Toolbar } from '@material-ui/core';
+import { DialogTitle, Dialog, DialogContent, IconButton,  } from '@material-ui/core';
 import { DataIngestor } from './fileInput';
 import { Add } from '@material-ui/icons';
 export const DataInputDialog = (props) => {

@@ -1,6 +1,6 @@
 import React from 'react'
 import { List, ListItem, ListItemIcon, ListItemText, Collapse } from '@material-ui/core';
-import { Save, ExpandLess, ExpandMore, Ballot } from '@material-ui/icons';
+import { Save, ExpandLess, ExpandMore,  } from '@material-ui/icons';
 import { DataInputDialog } from '../data/components/input/inputDialog';
 import { ResetDBModal } from '../data/components/input/resetDBModal';
 import { AddClassDialog } from '../data/classes/classRibbon';
@@ -38,14 +38,12 @@ export const DrawerItems = (props) => {
     return (
         <List>
             <DataItems />
-            <React.Fragment>
             <ListItem button>
                 <ListItemIcon>
                     < AddClassDialog />
                 </ListItemIcon>
                 <ListItemText primary="Classes" />
             </ListItem>
-            </React.Fragment>
 
         </List>
     )

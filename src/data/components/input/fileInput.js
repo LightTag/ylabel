@@ -1,8 +1,7 @@
 import React from 'react'
-import { TextField, Fade, MenuItem, Select, FormControl, Button, CircularProgress } from '@material-ui/core';
+import { TextField, Fade, MenuItem,  Button, CircularProgress } from '@material-ui/core';
 
 import { useDB } from '../../db/dbContext.dexie';
-const uuidv4 = require('uuid/v4');
 
 export function readFileAsync(file) {
     return new Promise((resolve, reject) => {

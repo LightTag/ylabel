@@ -6,6 +6,16 @@
     To see an example that works with IE, see FullTextSearch2.js.
 */
 import Dexie from 'dexie'
+import {
+    AST,
+    RegExpParser,
+    RegExpValidator,
+    RegExpVisitor,
+    parseRegExpLiteral,
+    validateRegExpLiteral,
+    visitRegExpAST
+} from "regexpp"
+
 const DBNAME = 'DATA'
 const DATA_SCHEMA = 'data'
 const CLASS_SCHEMA= 'schema'
@@ -23,33 +33,11 @@ const getTrigrams =(text)=>{
     return Array.from(trigrams)
 
 }
-const getTrigramsForQuery =(text)=>{
-    //To query we don't need all the trigrams, we can take them sequentially
-    
-    let trigrams = new Set()
-    for (let end=2; end <text.length+1; end+=3){
-        const tg = text.slice(end-2,end+1)
-        trigrams.add(tg)
-    }
-    debugger;
-    return Array.from(trigrams)
-
-}
-function getAllWords(text) {
-    /// <param name="text" type="String"></param>
-    var allWordsIncludingDups = text.split(' ');
-    var wordSet = allWordsIncludingDups.reduce(function (prev, current) {
-        prev[current] = true;
-        return prev;
-    }, {});
-    return Object.keys(wordSet);
-}
 
 const initializeDB =() =>{
     db.version(1).stores(stores);
     const initializeDataDB = ()  =>{
         db[DATA_SCHEMA].hook("creating", function (primKey, obj, trans) {
-            debugger;
             if (typeof obj.content == 'string') 
                 obj.contentWords = getTrigrams(obj.content);
         });
@@ -90,14 +78,19 @@ export const addData =  (data) => {
 export const search = async (query)=>{
 
     const terms = getTrigrams(query)
+    if (terms.length===0){
+        return Dexie.Promise.resolve([])
+    }
     const docKeys = await Dexie.Promise.all(terms.map(term=>{
         return db[DATA_SCHEMA].where("contentWords").equals(term).distinct().primaryKeys()
     }))
+    if (docKeys.length===0){
+        return Dexie.Promise.resolve([])
+    }
     const allMatch = docKeys.reduce((a, b) => {
         const set = new Set(b);
         return a.filter(k => set.has(k));
     });
-    debugger;
     let result = db[DATA_SCHEMA].where("id").anyOf(allMatch).toArray().then(arr=>{
         return  arr.filter(doc=>doc.content.search(query) !==-1)
     });
@@ -106,11 +99,29 @@ export const search = async (query)=>{
     return result
 }
 
+export const regexSearch =(pattern)=>{
+    
+    try{
+        //temp try catch block to avoid execptions when partial pattern is sent
+        
+
+    const regex = new RegExp(pattern)
+    return db[DATA_SCHEMA].filter(doc=>regex.test(doc.content)).toArray()
+}
+catch (e){
+    return Dexie.Promise.resolve([])
+}
+    
+}
+
 export const first =(n=20)=>{
     return db[DATA_SCHEMA].limit(n).toArray()
 }
-export const reset = ()=>{
-    return db[DATA_SCHEMA].clear()
+export const resetAll = ()=>{
+    return Dexie.Promise.all([
+        db[DATA_SCHEMA].clear(),
+        db[CLASS_SCHEMA].clear()
+    ])
 }
 
 export const addSchemaClass =(name,color,)=>{
