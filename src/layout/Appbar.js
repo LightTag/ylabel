@@ -9,6 +9,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { ResetDBModal } from '../data/components/input/resetDBModal';
 import { CardMedia, Avatar, Container } from '@material-ui/core';
 import { SearchBar } from '../data/components/searchBar';
+import { DataInputDialog } from '../data/components/input/inputDialog';
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
@@ -27,31 +28,22 @@ const useStyles = makeStyles(theme => ({
 
 }));
 
-export const YLabelAppbar =() => {
+export const YLabelAppbar =(props) => {
   const classes = useStyles();
 
   return (
-    <div className={classes.root}>
-      <AppBar position="static" >
+      <AppBar position="static" className={props.rootClass}>
 
       
         <Toolbar>
-        <Avatar
-          src={process.env.PUBLIC_URL + '/img/logo.png'}
-          title="Paella dish"
-          className={classes.bigAvatar} 
-        />
 
-          <Typography align="center" variant="h6" className={classes.title}>
-          <Container>
-          <SearchBar />
-          </Container>
+          <Typography align="left" variant="h6" className={classes.title}>
+            Why Label When You Can Search ? 
           </Typography>
-          
+          <DataInputDialog />
           <ResetDBModal />
 
         </Toolbar>
       </AppBar>
-    </div>
   );
 }

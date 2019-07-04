@@ -4,16 +4,14 @@ import { Grid, Button, IconButton, Dialog, DialogTitle, DialogContent, TextField
 import { Add } from '@material-ui/icons';
 import { applyClassToExample } from '../db/dexiewDB';
 
-const AddClassDialog = (props)=>{
+export const AddClassDialog = (props)=>{
     const classContext =useClassContext()
     const [name,setName] = React.useState(null)
     const [open,setOpen] = React.useState(false);
 
     return (
         <React.Fragment>
-        <IconButton onClick={()=>setOpen(true)}>
-            <Add/>
-        </IconButton>
+            <Add onClick={()=>setOpen(true)}/>
 
         <Dialog open={open} onClose={()=>setOpen(false)}>
             <DialogTitle>
@@ -54,10 +52,7 @@ export const ClassRibbon = (props)=>{
     }
     return(
     <Grid container spacing={2}>
-        <Grid item>
-        < AddClassDialog/>
-        </Grid>
-
+        
         {classContext.classes.map(cls=>(
             <Grid item>
             <Button 

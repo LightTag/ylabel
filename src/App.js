@@ -9,6 +9,7 @@ import { DataInputDialog } from './data/components/input/inputDialog';
 import { ResetDBModal } from './data/components/input/resetDBModal';
 import { YLabelAppbar } from './layout/Appbar';
 import { SearchContext } from './data/searchContext';
+import { ResponsiveDrawer } from './layout/drawer';
 function App() {
   return (
     <React.Fragment>
@@ -16,11 +17,12 @@ function App() {
       <ClassContext>
       <DBContext>
         <SearchContext>
-      <YLabelAppbar/>
+      
             <CssBaseline />
+            <ResponsiveDrawer />
             <Container>
             
-            <DataInputDialog />
+            
             <ExampleList />
             </Container>
             </SearchContext>

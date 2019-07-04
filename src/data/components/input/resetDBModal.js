@@ -1,7 +1,7 @@
 import React from 'react'
-import { Fab, DialogTitle, Dialog, DialogActions, Button, CircularProgress } from '@material-ui/core';
-import { ClearAll } from '@material-ui/icons';
+import { Fab, DialogTitle, Dialog, DialogActions, Button, CircularProgress, IconButton } from '@material-ui/core';
 import { resetIndex } from '../../db/indexCache';
+import { DeleteForever } from '@material-ui/icons';
 export const ResetDBModal =(props)=>{
     const [open,setOpen] = React.useState(false);
     const [erasing,setErasing] = React.useState(false)
@@ -13,9 +13,10 @@ export const ResetDBModal =(props)=>{
     }
     return (
         <React.Fragment>
-            <Fab
+            <IconButton
+            color='inherit'
                 onClick={()=>setOpen(true)}
-            ><ClearAll/></Fab>
+            ><DeleteForever/></IconButton>
 
             <Dialog open={open} onClose={()=>setOpen(false)}>
                 <DialogTitle>

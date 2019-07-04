@@ -14,6 +14,6 @@ Y-Label tried to solve the above by
 - Use IndexDB to give the user persistence without relying on a server
 
 ## Status
-As of now this is way before the V0 release and we're still figuring things out. The search funtionality works
+As of now this is way before the V0 release and we're still figuring things out. The search funtionality works, you can upload data and label it. We're working on AL with [tensorflow.js](https://www.tensorflow.org/js)
 
 
