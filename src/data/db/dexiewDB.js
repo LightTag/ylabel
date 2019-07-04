@@ -6,15 +6,6 @@
     To see an example that works with IE, see FullTextSearch2.js.
 */
 import Dexie from 'dexie'
-import {
-    AST,
-    RegExpParser,
-    RegExpValidator,
-    RegExpVisitor,
-    parseRegExpLiteral,
-    validateRegExpLiteral,
-    visitRegExpAST
-} from "regexpp"
 
 const DBNAME = 'DATA'
 const DATA_SCHEMA = 'data'

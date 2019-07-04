@@ -1,8 +1,7 @@
 import React from 'react'
-import { TextField, LinearProgress, FormControl, InputLabel, Input, InputAdornment, IconButton, FormHelperText, SvgIcon } from '@material-ui/core';
+import {  LinearProgress, FormControl, InputLabel, Input, InputAdornment, IconButton, FormHelperText, SvgIcon } from '@material-ui/core';
 import { useDebouncedCallback } from 'use-debounce';
 import { useSearch } from '../searchContext';
-import { Add } from '@material-ui/icons';
 const RegexIcon = (props)=>(
     <SvgIcon {...props}>
         <g id="regular-expression">
