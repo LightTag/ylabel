@@ -16,7 +16,7 @@ const stores = {}
 stores[DATA_SCHEMA] ="++id,human_label,model_label,*contentWords"
 stores[CLASS_SCHEMA]="++id,name"
 
-const getTrigrams =(text)=>{
+export const getTrigrams =(text)=>{
     let trigrams = new Set()
     for (let end=2; end <text.length; end++){
         trigrams.add(text.slice(end-2,end+1))

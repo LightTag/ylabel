@@ -56,9 +56,8 @@ export const ExampleList = (props) => {
     }
     const classes = useStyles()
     return (
-        <Container style={{height:'85vh'}}>
+        <Container style={{height:'86vh',marginTop:'2rem'}}>
         <div className={classes.root} style={{ position: 'relative', height: '100%', width:'100%', overflow: 'hidden' }} ref={ref}>
-        {examples.length} examples 
         <Grid container>
             <List
                 height={height}

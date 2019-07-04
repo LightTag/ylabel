@@ -14,14 +14,15 @@ export const Example = (props)=>{
         <Paper className={classes.root} id={props.example.id}>
             <CardHeader
                 title={props.example.id}
+                subheader={      <ClassRibbon example={props.example} handleUpdateExample={props.handleUpdateExample}/>}
             ></CardHeader>
-            <CardContent>
-            <Typography>
+            <CardContent style={{height:'80%',overflow:'auto'}}>
+            <Typography style={{whiteSpace:'pre-line',}}>
                 {props.example.content}
             </Typography>
             </CardContent>
             <CardActions>
-                <ClassRibbon example={props.example} handleUpdateExample={props.handleUpdateExample}/>
+          
             </CardActions>
         </Paper>
     )
