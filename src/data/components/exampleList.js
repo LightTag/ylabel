@@ -32,13 +32,13 @@ export const ExampleList = (props) => {
     const examples = search.examples;
 
     const maxHeight = examples.length > 1 ? height / 3 : height * 2 / 3
-    const rowHeight = examples.length > 1 ? maxHeight * 2 : height
+    const rowHeight = examples.length > 1 ? maxHeight * 3 : height
 
 
     const exampleRenderer = ({ index, key, style }) => {
         const example = examples[index]
         return (
-            <Grid item xs={12} style={{ ...style,  }} key={key} >
+            <Grid item xs={10} style={{ ...style,  }} key={key} >
                 <Example
                     handleUpdateExample={props.handleUpdateExample}
                     extraStyle={{ style }}
@@ -58,7 +58,7 @@ export const ExampleList = (props) => {
     return (
         <Container style={{height:'86vh',marginTop:'2rem'}}>
         <div className={classes.root} style={{ position: 'relative', height: '100%', width:'100%', overflow: 'hidden' }} ref={ref}>
-        <Grid container>
+        <Grid container alignItems="center" justify="center">
             <List
                 height={height}
                 rowHeight={rowHeight}
