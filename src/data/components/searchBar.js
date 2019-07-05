@@ -1,7 +1,10 @@
 import React from 'react'
-import {  LinearProgress, FormControl, InputLabel, Input, InputAdornment, IconButton, FormHelperText, SvgIcon } from '@material-ui/core';
+import {  LinearProgress, FormControl, InputLabel, Input, InputAdornment, IconButton, FormHelperText, SvgIcon, Grid, Typography } from '@material-ui/core';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+
 import { useDebouncedCallback } from 'use-debounce';
-import { useSearch } from '../searchContext';
+import { useSearch, LABEL_FILTER_OPTIONS } from '../searchContext';
 const RegexIcon = (props)=>(
     <SvgIcon {...props}>
         <g id="regular-expression">
@@ -26,7 +29,8 @@ export const SearchBar = (props)=>{
       );
     
     return (
-
+        <Grid container>
+        <Grid item xs={12}>
         <FormControl >
         <InputLabel htmlFor="searchbar">Search for something</InputLabel>
         <Input
@@ -45,6 +49,27 @@ export const SearchBar = (props)=>{
                 <FormHelperText id="weight-helper-text">{search.searching ? <LinearProgress /> : "Runs a full text search on your data"}</FormHelperText>
 
       </FormControl>
+      </Grid>
+      <Grid item xs={12} >
+          <ToggleButtonGroup exclusive value={search.labelFilter} onChange={(e,v)=>search.setLabelFilter(v)}>
+          <ToggleButton value={LABEL_FILTER_OPTIONS.ALL} size="small">
+              All
+            </ToggleButton>
+            <ToggleButton value={LABEL_FILTER_OPTIONS.LABELED} size="small">
+              LABELED
+            </ToggleButton>
+            <ToggleButton value={LABEL_FILTER_OPTIONS.UNLABELED} size="small">
+              UNLABELED
+            </ToggleButton>
+
+          </ToggleButtonGroup>
+        <Grid item xs={12}>
+          <Typography>
+              {search.examples.length} examples in group
+          </Typography>
+        </Grid>
+      </Grid>
+      </Grid>
 
     )
 }

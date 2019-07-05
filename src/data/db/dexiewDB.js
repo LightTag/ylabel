@@ -83,7 +83,16 @@ export const search = async (query)=>{
         return a.filter(k => set.has(k));
     });
     let result = db[DATA_SCHEMA].where("id").anyOf(allMatch).toArray().then(arr=>{
-        return  arr.filter(doc=>doc.content.search(query) !==-1)
+        return arr.reduce((reduced,cur)=>{
+            const start = cur.content.search(query);
+            if (start!=-1){
+                const end = start +query.length
+                cur.entities = [{start,end}]
+                reduced.push(cur)
+            }
+            return reduced
+        },[]
+        )
     });
     // Finnaly, filter to find the exact query
     
@@ -97,7 +106,7 @@ export const regexSearch =(pattern)=>{
         
 
     const regex = new RegExp(pattern)
-    return db[DATA_SCHEMA].filter(doc=>regex.test(doc.content)).toArray()
+    db[DATA_SCHEMA].filter(doc=>regex.test(doc.content)).toArray()
 }
 catch (e){
     return Dexie.Promise.resolve([])
