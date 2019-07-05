@@ -112,6 +112,9 @@ export const  ResponsiveDrawer = (props) => {
           </Drawer>
         </Hidden>
       </nav>
+      <main className={classes.content}>
+            {props.children}
+      </main>
     </div>
 
 )

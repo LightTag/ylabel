@@ -25,7 +25,7 @@ export const YLabelAppbar =(props) => {
   const classes = useStyles();
 
   return (
-      <AppBar position="static" className={props.rootClass}>
+      <AppBar position="fixed" className={props.rootClass}>
 
       
         <Toolbar>

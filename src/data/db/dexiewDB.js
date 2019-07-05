@@ -106,7 +106,7 @@ export const regexSearch =(pattern)=>{
         
 
     const regex = new RegExp(pattern)
-    db[DATA_SCHEMA].filter(doc=>regex.test(doc.content)).toArray()
+    return db[DATA_SCHEMA].filter(doc=>regex.test(doc.content)).toArray()
 }
 catch (e){
     return Dexie.Promise.resolve([])

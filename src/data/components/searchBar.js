@@ -50,16 +50,16 @@ export const SearchBar = (props)=>{
 
       </FormControl>
       </Grid>
-      <Grid item xs={12} >
-          <ToggleButtonGroup exclusive value={search.labelFilter} onChange={(e,v)=>search.setLabelFilter(v)}>
-          <ToggleButton value={LABEL_FILTER_OPTIONS.ALL} size="small">
+      <Grid item xs={12} style={{marginTop:'1rem'}}>
+          <ToggleButtonGroup exclusive value={search.labelFilter} onChange={(e,v)=>search.setLabelFilter(v)} size="small">
+          <ToggleButton value={LABEL_FILTER_OPTIONS.ALL} >
               All
             </ToggleButton>
             <ToggleButton value={LABEL_FILTER_OPTIONS.LABELED} size="small">
-              LABELED
+              Done
             </ToggleButton>
             <ToggleButton value={LABEL_FILTER_OPTIONS.UNLABELED} size="small">
-              UNLABELED
+              Empty
             </ToggleButton>
 
           </ToggleButtonGroup>

@@ -15,12 +15,13 @@ function App() {
         <SearchContext>
       
             <CssBaseline />
-            <ResponsiveDrawer />
+            <ResponsiveDrawer >
             <Container>
             
             
             <ExampleList />
             </Container>
+            </ResponsiveDrawer>
             </SearchContext>
         </DBContext>
       </ClassContext>
