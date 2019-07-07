@@ -7,6 +7,7 @@
 */
 import Dexie from 'dexie'
 import { getTrigrams, getTrigramsCount } from './tokenizationUtils';
+import { searchForTrigrams } from './queryFunctions';
 var hash = require('object-hash');
 
 const DBNAME = 'DATA'
@@ -57,8 +58,20 @@ const initializeDB = () => {
                     .then(item=>{
                         // If not found
                         if (item===undefined){
-                            db[DF_SCHEMA].add({trigram,freq:1})
-                        }else{
+                            
+                                db[DF_SCHEMA].add({trigram,freq:1})
+                                .catch(e=>{
+                                    if (e instanceof Dexie.ConstraintError){
+                                        //This is a race condition. The object was created in another transaction.
+                                        // We made make more errors because of this and the count won't be perfect.
+                                        //Anyway, we just do the same thing again, this time it will definetly be there
+                                        db[DF_SCHEMA].get(trigram)
+                                        .then(item=>{db[DF_SCHEMA].update(trigram,{freq:item.freq+1})})
+                                        }
+                                })
+                            }
+                            
+                        else{
                             //Increment the document frequency by 1
                             db[DF_SCHEMA].update(trigram,{freq:item.freq+1})
                         }
@@ -93,38 +106,27 @@ export const dataTable = db[DATA_SCHEMA]
 export const postingsTable = db[POSTINGS_SCHEMA];
 export const dfTable = db[DF_SCHEMA];
 
-export const addData = (data) => {
-    return db.transaction('rw', db[DATA_SCHEMA], () => {
-        data.forEach(d => db[DATA_SCHEMA].add(d));
-    })
-}
+export const addData = async (data,index=0) => {
+    if (data.length <=0){
+        return;
+    }
+    const slice = data.slice(0,100);
+    const remaining =data.slice(100,data.length);
+
+    return   db[DATA_SCHEMA].bulkAdd(slice,)
+        .then((res)=>{
+            debugger;
+            console.log(slice);
+            return addData(remaining,index+100);
+        })
+    }
+
 
 export const search = async (query) => {
 
     const terms = getTrigrams(query)
-    if (terms.length === 0) {
-        return Dexie.Promise.resolve([])
-    }
-    const docKeys = await Dexie.Promise.all(terms.map(term => {
-        return db[DATA_SCHEMA].where("contentWords").equals(term).distinct().primaryKeys()
-    }))
-    if (docKeys.length === 0) {
-        return Dexie.Promise.resolve([])
-    }
-    const allMatch = docKeys.reduce((a, b) => {
-        const set = new Set(b);
-        return a.filter(k => set.has(k));
-    });
-    return db[DATA_SCHEMA].where("id").anyOf(allMatch).primaryKeys()
-        .then(matchingDocumentIds => {
-            const queryCacheObject = {
-                "id": hash(query),
-                docIds: matchingDocumentIds
-            }
-            db[QUERY_SCHEMA].add(queryCacheObject)
-            return matchingDocumentIds
-        })
-
+    const candidateDocIds = await searchForTrigrams(terms);
+    return dataTable.where("id").anyOf(candidateDocIds).filter(x=>x.content.search(query) !=-1).primaryKeys()
     // Finnaly, filter to find the exact query
 
 
@@ -179,3 +181,4 @@ export const applyClassToExample = (exampleId, className) => {
     return db[DATA_SCHEMA].update(exampleId, { human_label: className, has_class: true })
 }
 
+export const getExampleCount = () =>dataTable.count()
