@@ -43,6 +43,7 @@
     ]
   },
   "devDependencies": {
+    "fake-indexeddb": "^2.1.1",
     "gh-pages": "^2.0.1"
   },
   "homepage": "https://lighttag.github.io/ylabel/"
