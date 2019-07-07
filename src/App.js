@@ -6,7 +6,10 @@ import { ExampleList, } from './data/components/exampleList';
 import { ClassContext } from './data/classes/classContext';
 import { SearchContext } from './data/searchContext';
 import { ResponsiveDrawer } from './layout/drawer';
+
+
 function App() {
+
   return (
     <React.Fragment>
       
@@ -17,6 +20,7 @@ function App() {
             <CssBaseline />
             <ResponsiveDrawer >
             <Container>
+
             
             
             <ExampleList />

@@ -20,7 +20,6 @@ export const SearchContext = (props)=>{
         /* The user can select whether to display labeled, unlabeld or both examples. 
         We do the filtering in the component for now, because it's compilcate in the DB
         */
-       debugger;
 
         switch (labelFilter){
 

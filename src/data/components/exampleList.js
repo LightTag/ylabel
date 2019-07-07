@@ -15,7 +15,7 @@
     It's not deep, but it's complex and makes a difference for the user
 */
 import React from 'react'
-import { makeStyles, Grid, Container,  } from '@material-ui/core';
+import { makeStyles, Grid, Container, CircularProgress, LinearProgress,  } from '@material-ui/core';
 import { CellMeasurer, CellMeasurerCache, List } from 'react-virtualized';
 import { Example } from './example';
 import { useSearch } from '../searchContext';
@@ -94,6 +94,9 @@ export const ExampleList = (props) => {
         )
     }
     const classes = useStyles()
+    if (search.searching){
+        return <LinearProgress />
+    }
     return (
         <Container style={{height:'86vh',marginTop:'2rem'}}>
         <div className={classes.root} style={{ position: 'relative', height: '100%', width:'100%', overflow: 'hidden' }} ref={ref}>

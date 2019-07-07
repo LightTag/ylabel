@@ -47,7 +47,6 @@ export const ClassRibbon = (props)=>{
     const db = useDB()
     const classContext =useClassContext()
     const applyClass =(name)=>{
-        debugger;
         db.setDocCLass(props.example.id,name)
     }
     return(

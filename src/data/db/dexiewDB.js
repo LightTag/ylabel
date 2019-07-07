@@ -115,7 +115,7 @@ catch (e){
 }
 
 export const first =(n=20)=>{
-    return db[DATA_SCHEMA].limit(n).toArray()
+    return db[DATA_SCHEMA].toArray()
 }
 export const resetAll = ()=>{
     return Dexie.Promise.all([

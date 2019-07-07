@@ -2,8 +2,8 @@ import React from 'react'
 import { TextField, Fade, MenuItem,  Button, CircularProgress } from '@material-ui/core';
 
 import { useDB } from '../../db/dbContext.dexie';
-
-export function readFileAsync(file) {
+import Papa from 'papaparse'
+export function readJSONFileAsync(file) {
     return new Promise((resolve, reject) => {
         let reader = new FileReader();
 
@@ -16,13 +16,24 @@ export function readFileAsync(file) {
         reader.readAsText(file);
     })
 }
+
+
 export const FileInput = (props) => {
     const handleNewFile = async (e, extra) => {
         //Todo move this to a webworker (requires ejecting https://github.com/developit/workerize-loader/issues/35)
         const file = e.target.files[0]
-        const contents = await readFileAsync(file);
-        const data = JSON.parse(contents);
-        props.handleNewData(data)
+        const contents = await readJSONFileAsync(file);
+        debugger;
+        if (file.name.endsWith('.json')){
+            const data = JSON.parse(contents);
+            props.handleNewData(data);
+    
+        }else{
+            const data = Papa.parse(contents,{
+                header:true
+            }).data;
+            props.handleNewData(data);
+        }
     }
     return (
         <TextField
