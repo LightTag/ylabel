@@ -6,15 +6,17 @@
     To see an example that works with IE, see FullTextSearch2.js.
 */
 import Dexie from 'dexie'
+var hash = require('object-hash');
 
 const DBNAME = 'DATA'
 const DATA_SCHEMA = 'data'
 const CLASS_SCHEMA= 'schema'
-
+const QUERY_SCHEMA = 'query'
 var db = new Dexie(DBNAME);
 const stores = {}
 stores[DATA_SCHEMA] ="++id,human_label,model_label,*contentWords"
 stores[CLASS_SCHEMA]="++id,name"
+stores[QUERY_SCHEMA]="++id,*docIds"
 
 export const getTrigrams =(text)=>{
     let trigrams = new Set()
@@ -82,21 +84,19 @@ export const search = async (query)=>{
         const set = new Set(b);
         return a.filter(k => set.has(k));
     });
-    let result = db[DATA_SCHEMA].where("id").anyOf(allMatch).toArray().then(arr=>{
-        return arr.reduce((reduced,cur)=>{
-            const start = cur.content.search(query);
-            if (start!=-1){
-                const end = start +query.length
-                cur.entities = [{start,end}]
-                reduced.push(cur)
+    return db[DATA_SCHEMA].where("id").anyOf(allMatch).primaryKeys()
+        .then(matchingDocumentIds=>{
+            const queryCacheObject = {
+                "id":hash(query),
+                docIds:matchingDocumentIds
             }
-            return reduced
-        },[]
-        )
-    });
+            db[QUERY_SCHEMA].add(queryCacheObject)
+            return matchingDocumentIds
+        })
+    
     // Finnaly, filter to find the exact query
     
-    return result
+    
 }
 
 export const regexSearch =(pattern)=>{
@@ -106,8 +106,16 @@ export const regexSearch =(pattern)=>{
         
 
     const regex = new RegExp(pattern)
-    return db[DATA_SCHEMA].filter(doc=>regex.test(doc.content)).toArray()
-}
+    return db[DATA_SCHEMA].filter(doc=>regex.test(doc.content)).primaryKeys()
+    .then(matchingDocumentIds=>{
+        const queryCacheObject = {
+            "id":hash(pattern),
+            docIds:matchingDocumentIds
+        }
+        db[QUERY_SCHEMA].add(queryCacheObject)
+        return matchingDocumentIds
+        })
+    }
 catch (e){
     return Dexie.Promise.resolve([])
 }
@@ -115,7 +123,7 @@ catch (e){
 }
 
 export const first =(n=20)=>{
-    return db[DATA_SCHEMA].toArray()
+    return db[DATA_SCHEMA].limit(100).primaryKeys()
 }
 export const resetAll = ()=>{
     return Dexie.Promise.all([
@@ -124,6 +132,9 @@ export const resetAll = ()=>{
     ])
 }
 
+export const getDocById=(id)=>{
+    return db[DATA_SCHEMA].get(id)
+}
 export const addSchemaClass =(name,color,)=>{
     
         return db[CLASS_SCHEMA].add({name,color})

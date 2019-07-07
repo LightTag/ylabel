@@ -48,6 +48,8 @@ export const ClassRibbon = (props)=>{
     const classContext =useClassContext()
     const applyClass =(name)=>{
         db.setDocCLass(props.example.id,name)
+        .then(props.handleUpdateExample)
+
     }
     return(
     <Grid container spacing={2}>

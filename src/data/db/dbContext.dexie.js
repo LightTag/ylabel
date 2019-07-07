@@ -29,8 +29,7 @@ export const DBContext = (props)=>{
             incrementStep();
         },
         setDocCLass: (exampleId,className)=>{
-            dbUtils.applyClassToExample(exampleId,className)
-            .then(incrementStep)
+            return dbUtils.applyClassToExample(exampleId,className)
             
         },
         updateDocsBatch:(docs)=>{
@@ -46,6 +45,10 @@ export const DBContext = (props)=>{
         regexSearch:  async (pattern,)=>{
             const results = await dbUtils.regexSearch(pattern)
             return  results
+        },
+
+        getDocumentById: (id)=>{
+            return dbUtils.getDocById(id)
         },
 
         allDocs:()=>{
