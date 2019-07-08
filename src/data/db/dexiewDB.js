@@ -107,17 +107,17 @@ export const postingsTable = db[POSTINGS_SCHEMA];
 export const dfTable = db[DF_SCHEMA];
 
 export const addData = async (data,index=0) => {
+    const step =5
     if (data.length <=0){
         return;
     }
-    const slice = data.slice(0,100);
-    const remaining =data.slice(100,data.length);
+    const slice = data.slice(0,step);
+    const remaining =data.slice(step,data.length);
 
     return   db[DATA_SCHEMA].bulkAdd(slice,)
         .then((res)=>{
-            debugger;
             console.log(slice);
-            return addData(remaining,index+100);
+            return addData(remaining,index+step);
         })
     }
 
