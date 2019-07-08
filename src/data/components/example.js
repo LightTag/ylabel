@@ -9,6 +9,7 @@ const useStyles = makeStyles(theme => ({
         marginTop: '1rem'
     }
 }))
+
 export const Example = (props) => {
     const classes = useStyles()
     const db = useDB()

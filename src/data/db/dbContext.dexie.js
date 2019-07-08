@@ -39,7 +39,7 @@ export const DBContext = (props)=>{
             incrementStep();
         },
         search:  async (query,params)=>{
-            const results = await dbUtils.search(query)
+            const results = await dbUtils.search(query,params)
             return  results
         },
         regexSearch:  async (pattern,)=>{

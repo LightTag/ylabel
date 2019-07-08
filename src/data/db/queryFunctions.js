@@ -11,7 +11,6 @@ export const searchForTrigram = async (trigram,docIds=[])=>{
         Given a trigram and 
     */
     let keys ;
-    debugger;
     if (docIds.length===0){
         //If only a trigram was provided
         keys = await postingsTable.where(`[trigram+docId]`)
@@ -62,7 +61,6 @@ export const  searchForTrigrams = async (trigrams,docIds=[]) =>{
     const previousTrigramCount = trigrams.length
     trigrams = await sortTrigramsByDF(trigrams)
     trigrams = trigrams.map(x=>x.trigram);
-    debugger;
     if (trigrams.length < previousTrigramCount || trigrams.length ===0){
         // In this case, one or more of the trigrams was not in the index, so return [] without searching
         return []

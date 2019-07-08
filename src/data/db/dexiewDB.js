@@ -8,6 +8,7 @@
 import Dexie from 'dexie'
 import { getTrigrams, getTrigramsCount } from './tokenizationUtils';
 import { searchForTrigrams } from './queryFunctions';
+import { LABEL_FILTER_OPTIONS } from '../searchContext';
 var hash = require('object-hash');
 
 const DBNAME = 'DATA'
@@ -122,11 +123,40 @@ export const addData = async (data,index=0) => {
     }
 
 
-export const search = async (query) => {
+export const search = async (query,params) => {
+    let candidateDocIds
+    if (query===undefined || query===null || query.length===0){
+         candidateDocIds = await dataTable.toCollection().primaryKeys()
+    }else{
+        const   terms = getTrigrams(query)
+         candidateDocIds = await searchForTrigrams(terms);
+    }
+    let result
+    switch (params.labelFilter){
+        case LABEL_FILTER_OPTIONS.ALL:
+        result= dataTable.where("id").anyOf(candidateDocIds)
+        break;
+        case LABEL_FILTER_OPTIONS.LABELED:
+        result= dataTable.where('[has_label+id]').anyOf(candidateDocIds.map(id=>[1,id]))
+        break;
+        case LABEL_FILTER_OPTIONS.UNLABELED:
+            
+            const idsToExclude =  new Set(await dataTable.where('[has_label+id]').anyOf(candidateDocIds.map(id=>[1,id])).primaryKeys())
+            debugger;
+            const idsToGet = candidateDocIds.filter(x=>!idsToExclude.has(x))
+            result= dataTable.where("id").anyOf(idsToGet)
+            break
 
-    const terms = getTrigrams(query)
-    const candidateDocIds = await searchForTrigrams(terms);
-    return dataTable.where("id").anyOf(candidateDocIds).filter(x=>x.content.search(query) !=-1).primaryKeys()
+        default: 
+            throw new Error(params.labelFilter)
+    }
+
+    if (query && query.length>0){
+        return result.filter(x=>x.content.search(query) !=-1).primaryKeys()
+    }else{
+        return result.primaryKeys()
+    }
+    
     // Finnaly, filter to find the exact query
 
 
@@ -178,7 +208,7 @@ export const getSchemaClasses = () => {
 }
 
 export const applyClassToExample = (exampleId, className) => {
-    return db[DATA_SCHEMA].update(exampleId, { human_label: className, has_class: true })
+    return db[DATA_SCHEMA].update(exampleId, { human_label: className, has_label: 1 })
 }
 
 export const getExampleCount = () =>dataTable.count()
