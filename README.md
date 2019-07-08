@@ -1,7 +1,7 @@
 # Y-Label
 Let anyone search and label text with active learning and no servers
 <a href="https://www.loom.com/share/3aa977fa20524ed4abc90e540d43a33b">
- <p>React App - Watch Video</p> 
+ <p>Watch The Intro Video</p> 
  <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/3aa977fa20524ed4abc90e540d43a33b-with-play.jpg">
   </a>
 
