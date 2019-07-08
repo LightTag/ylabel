@@ -1,7 +1,13 @@
 # Y-Label
 Let anyone search and label text with active learning and no servers
 
-<div style="position: relative; padding-bottom: 56.25%; height: 0;"><iframe src="https://www.loom.com/embed/3aa977fa20524ed4abc90e540d43a33b" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
+<div style="position: relative; padding-bottom: 56.25%; height: 0;">
+
+<iframe src="https://www.loom.com/embed/3aa977fa20524ed4abc90e540d43a33b" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+
+</iframe>
+
+</div>
 
 ## Problem it solves
 Typical usage scenario is company X has some domain experts (Doctor, trader, lawyer) and lots of text data and they want the expert to label the data. 
