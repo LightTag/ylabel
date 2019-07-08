@@ -55,7 +55,7 @@ export const ExampleList = (props) => {
             setWidth(node.clientWidth);
         }
     })
-    const examples = search.examples;
+    const exampleIds = search.examples;
 
 
 
@@ -63,7 +63,7 @@ export const ExampleList = (props) => {
         /*
             This function renderes each example in the list. RV calls it when the item is about to come into view
         */
-        const example = examples[index]
+        const exampleId = exampleIds[index]
         return (
             <CellMeasurer
             cache={cache}
@@ -72,17 +72,19 @@ export const ExampleList = (props) => {
             parent={parent}
             rowIndex={index}
           >
-            {({ measure }) => ( //Not sure what measure does, it was in the example I found. 
+            {({ measure }) => ( // Measure is called by the example one it has retreived the example from the DB so that it's size is set
 
             <Grid item xs={10} style={{ ...style,  }} key={key} >
                 <Example
                     handleUpdateExample={props.handleUpdateExample}
                     extraStyle={{ style }}
                     orderIndex={1}
-                    key={example.id}
-                    example={example}
+                    key={exampleId}
+                    exampleId={exampleId}
                     anno_source={props.anno_source}
                     schema={props.schema}
+                    onLoad={measure}
+
                 />
 
             </Grid>
@@ -107,7 +109,7 @@ export const ExampleList = (props) => {
                 rowHeight={cache.rowHeight}
                 rowRenderer={exampleRenderer}
                 width={width}
-                rowCount={examples.length}
+                rowCount={exampleIds.length}
             />
             </Grid>
         </div>

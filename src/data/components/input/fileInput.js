@@ -23,7 +23,6 @@ export const FileInput = (props) => {
         //Todo move this to a webworker (requires ejecting https://github.com/developit/workerize-loader/issues/35)
         const file = e.target.files[0]
         const contents = await readJSONFileAsync(file);
-        debugger;
         if (file.name.endsWith('.json')){
             const data = JSON.parse(contents);
             props.handleNewData(data);
