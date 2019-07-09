@@ -26,7 +26,7 @@ stores[DATA_SCHEMA] = "id,human_label,model_label,[has_label+id]" // and content
 
 stores[CLASS_SCHEMA] = "++id,name"
 stores[QUERY_SCHEMA] = "++id,*docIds"
-stores[DF_SCHEMA] = "trigram,[trigram+freq]" // compund index lets us filter and sort for least frequent df
+stores[DF_SCHEMA] ="trigram,[trigram+freq]" // compund index lets us filter and sort for least frequent df
 
 
 
@@ -51,63 +51,65 @@ export const dataTable = db[DATA_SCHEMA]
 export const postingsTable = db[POSTINGS_SCHEMA];
 export const dfTable = db[DF_SCHEMA];
 
-export const addData = async (data, index = 0) => {
+export const addData = async (data,index=0) => {
 
-    const step = 10000
-    if (data.length <= 0) {
-        return updateDFTableAfterInsert();
+    const step =10000
+    if (data.length <=0){
+        return  updateDFTableAfterInsert();
 
     }
     var startDate = new Date();
 
-    return addDocsToStore(data.slice(0, step))
-        .then(() => {
+    return   db.transaction('rw',[POSTINGS_SCHEMA,DATA_SCHEMA],tx=>{
+        return addDocsToStore(data.slice(0,step))
+        .then(()=>{
             var endDate = new Date();
-            console.log(`Inserted ${step} docs in ${endDate - startDate} ms`)
-
+            console.log(`Inserted ${step} docs in ${endDate-startDate} ms`)
+            
         })
+    
+    })
+    .then(()=>{
+        return  addData(data.slice(step,data.length))
+    })
+    
+    }
 
-        .then(() => {
-            return addData(data.slice(step, data.length))
-        })
 
-}
-
-
-export const search = async (query, params) => {
+export const search = async (query,params) => {
     let candidateDocIds
-    if (query === undefined || query === null || query.length === 0) {
-        candidateDocIds = await dataTable.toCollection().primaryKeys()
-    } else {
-        const terms = getTrigrams(query)
-        candidateDocIds = await searchForTrigrams(terms);
+    if (query===undefined || query===null || query.length===0){
+         candidateDocIds = await dataTable.toCollection().primaryKeys()
+    }else{
+        const   terms = getTrigrams(query)
+         candidateDocIds = await searchForTrigrams(terms);
     }
     let result
-    switch (params.labelFilter) {
+    switch (params.labelFilter){
         case LABEL_FILTER_OPTIONS.ALL:
-            result = dataTable.where("id").anyOf(candidateDocIds)
-            break;
+        result= dataTable.where("id").anyOf(candidateDocIds)
+        break;
         case LABEL_FILTER_OPTIONS.LABELED:
-            result = dataTable.where('[has_label+id]').anyOf(candidateDocIds.map(id => [1, id]))
-            break;
+        result= dataTable.where('[has_label+id]').anyOf(candidateDocIds.map(id=>[1,id]))
+        break;
         case LABEL_FILTER_OPTIONS.UNLABELED:
-
-            const idsToExclude = new Set(await dataTable.where('[has_label+id]').anyOf(candidateDocIds.map(id => [1, id])).primaryKeys())
+            
+            const idsToExclude =  new Set(await dataTable.where('[has_label+id]').anyOf(candidateDocIds.map(id=>[1,id])).primaryKeys())
             debugger;
-            const idsToGet = candidateDocIds.filter(x => !idsToExclude.has(x))
-            result = dataTable.where("id").anyOf(idsToGet)
+            const idsToGet = candidateDocIds.filter(x=>!idsToExclude.has(x))
+            result= dataTable.where("id").anyOf(idsToGet)
             break
 
-        default:
+        default: 
             throw new Error(params.labelFilter)
     }
 
-    if (query && query.length > 0) {
-        return result.filter(x => x.content.search(query) != -1).primaryKeys()
-    } else {
+    if (query && query.length>0){
+        return result.filter(x=>x.content.search(query) !=-1).primaryKeys()
+    }else{
         return result.primaryKeys()
     }
-
+    
     // Finnaly, filter to find the exact query
 
 
@@ -162,4 +164,4 @@ export const applyClassToExample = (exampleId, className) => {
     return db[DATA_SCHEMA].update(exampleId, { human_label: className, has_label: 1 })
 }
 
-export const getExampleCount = () => dataTable.count()
+export const getExampleCount = () =>dataTable.count()
