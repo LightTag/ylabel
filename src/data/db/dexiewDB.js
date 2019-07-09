@@ -9,6 +9,7 @@ import Dexie from 'dexie'
 import { getTrigrams, getTrigramsCount } from './tokenizationUtils';
 import { searchForTrigrams } from './queryFunctions';
 import { LABEL_FILTER_OPTIONS } from '../searchContext';
+import { updateDFTableAfterInsert, addDocsToStore } from './insertionUtils';
 var hash = require('object-hash');
 
 const DBNAME = 'DATA'
@@ -19,13 +20,13 @@ const CLASS_SCHEMA = 'schema'
 const QUERY_SCHEMA = 'query'
 var db = new Dexie(DBNAME);
 const stores = {}
-stores[POSTINGS_SCHEMA] = "[trigram+docId]" // term,doc_id, frequency
+stores[POSTINGS_SCHEMA] = "[trigram+docId],trigram" // term,doc_id, frequency
 
-stores[DATA_SCHEMA] = "++id,human_label,model_label,[has_label+id]" // and content,class
+stores[DATA_SCHEMA] = "id,human_label,model_label,[has_label+id]" // and content,class
 
 stores[CLASS_SCHEMA] = "++id,name"
 stores[QUERY_SCHEMA] = "++id,*docIds"
-stores[DF_SCHEMA] ="trigram,[trigram+freq]" // compund index lets us filter and sort for least frequent df
+stores[DF_SCHEMA] = "trigram,[trigram+freq]" // compund index lets us filter and sort for least frequent df
 
 
 
@@ -33,63 +34,6 @@ stores[DF_SCHEMA] ="trigram,[trigram+freq]" // compund index lets us filter and 
 const initializeDB = () => {
     db.version(1).stores(stores);
     const initializeDataDB = () => {
-
-        db._createTransaction = Dexie.override(db._createTransaction, function (createTransaction) {
-            // Override db._createTransaction() to make sure to add postings schema  table to any transaction being modified
-            // If not doing this, error will occur in the hooks unless the application code has included postings schema in the transaction when modifying data table.
-            return function (mode, storeNames, dbSchema) {
-                if (mode === "readwrite" && storeNames.indexOf(POSTINGS_SCHEMA) == -1) {
-                    storeNames = storeNames.slice(0); // Clone storeNames before mippling with it.
-                    storeNames.push(POSTINGS_SCHEMA);
-                    storeNames.push(DF_SCHEMA);
-                }
-                return createTransaction.call(this, mode, storeNames, dbSchema);
-            }
-        });
-
-        db[DATA_SCHEMA].hook("creating", function (primKey, obj, trans) {
-            // Must wait till we have the auto-incremented key.
-            trans._lock(); // Lock transaction until we got primary key and added all mappings. App code trying to read from dataTable the line after having added an email must then wait until we are done writing the mappings.
-            this.onsuccess = (docId) => {
-                // Add mappings for all words.
-                const trigramCounts = getTrigramsCount(obj.content)
-                Object.entries(trigramCounts).forEach(([trigram, freq]) => {
-                    db[POSTINGS_SCHEMA].add({ trigram, docId, freq });
-                    db[DF_SCHEMA].get(trigram)
-                    .then(item=>{
-                        // If not found
-                        if (item===undefined){
-                            
-                                db[DF_SCHEMA].add({trigram,freq:1})
-                                .catch(e=>{
-                                    if (e instanceof Dexie.ConstraintError){
-                                        //This is a race condition. The object was created in another transaction.
-                                        // We made make more errors because of this and the count won't be perfect.
-                                        //Anyway, we just do the same thing again, this time it will definetly be there
-                                        db[DF_SCHEMA].get(trigram)
-                                        .then(item=>{db[DF_SCHEMA].update(trigram,{freq:item.freq+1})})
-                                        }
-                                })
-                            }
-                            
-                        else{
-                            //Increment the document frequency by 1
-                            db[DF_SCHEMA].update(trigram,{freq:item.freq+1})
-                        }
-
-
-                    })
-                })
-                trans._unlock();
-            }
-            this.onerror = function () {
-                trans._unlock();
-            }
-        });
-
-
-
-
 
         // Open database to allow application code using it.
         db.open();
@@ -107,56 +51,63 @@ export const dataTable = db[DATA_SCHEMA]
 export const postingsTable = db[POSTINGS_SCHEMA];
 export const dfTable = db[DF_SCHEMA];
 
-export const addData = async (data,index=0) => {
-    const step =5
-    if (data.length <=0){
-        return;
-    }
-    const slice = data.slice(0,step);
-    const remaining =data.slice(step,data.length);
+export const addData = async (data, index = 0) => {
 
-    return   db[DATA_SCHEMA].bulkAdd(slice,)
-        .then((res)=>{
-            console.log(slice);
-            return addData(remaining,index+step);
+    const step = 10000
+    if (data.length <= 0) {
+        return updateDFTableAfterInsert();
+
+    }
+    var startDate = new Date();
+
+    return addDocsToStore(data.slice(0, step))
+        .then(() => {
+            var endDate = new Date();
+            console.log(`Inserted ${step} docs in ${endDate - startDate} ms`)
+
         })
-    }
+
+        .then(() => {
+            return addData(data.slice(step, data.length))
+        })
+
+}
 
 
-export const search = async (query,params) => {
+export const search = async (query, params) => {
     let candidateDocIds
-    if (query===undefined || query===null || query.length===0){
-         candidateDocIds = await dataTable.toCollection().primaryKeys()
-    }else{
-        const   terms = getTrigrams(query)
-         candidateDocIds = await searchForTrigrams(terms);
+    if (query === undefined || query === null || query.length === 0) {
+        candidateDocIds = await dataTable.toCollection().primaryKeys()
+    } else {
+        const terms = getTrigrams(query)
+        candidateDocIds = await searchForTrigrams(terms);
     }
     let result
-    switch (params.labelFilter){
+    switch (params.labelFilter) {
         case LABEL_FILTER_OPTIONS.ALL:
-        result= dataTable.where("id").anyOf(candidateDocIds)
-        break;
+            result = dataTable.where("id").anyOf(candidateDocIds)
+            break;
         case LABEL_FILTER_OPTIONS.LABELED:
-        result= dataTable.where('[has_label+id]').anyOf(candidateDocIds.map(id=>[1,id]))
-        break;
+            result = dataTable.where('[has_label+id]').anyOf(candidateDocIds.map(id => [1, id]))
+            break;
         case LABEL_FILTER_OPTIONS.UNLABELED:
-            
-            const idsToExclude =  new Set(await dataTable.where('[has_label+id]').anyOf(candidateDocIds.map(id=>[1,id])).primaryKeys())
+
+            const idsToExclude = new Set(await dataTable.where('[has_label+id]').anyOf(candidateDocIds.map(id => [1, id])).primaryKeys())
             debugger;
-            const idsToGet = candidateDocIds.filter(x=>!idsToExclude.has(x))
-            result= dataTable.where("id").anyOf(idsToGet)
+            const idsToGet = candidateDocIds.filter(x => !idsToExclude.has(x))
+            result = dataTable.where("id").anyOf(idsToGet)
             break
 
-        default: 
+        default:
             throw new Error(params.labelFilter)
     }
 
-    if (query && query.length>0){
-        return result.filter(x=>x.content.search(query) !=-1).primaryKeys()
-    }else{
+    if (query && query.length > 0) {
+        return result.filter(x => x.content.search(query) != -1).primaryKeys()
+    } else {
         return result.primaryKeys()
     }
-    
+
     // Finnaly, filter to find the exact query
 
 
@@ -211,4 +162,4 @@ export const applyClassToExample = (exampleId, className) => {
     return db[DATA_SCHEMA].update(exampleId, { human_label: className, has_label: 1 })
 }
 
-export const getExampleCount = () =>dataTable.count()
+export const getExampleCount = () => dataTable.count()

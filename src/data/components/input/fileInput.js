@@ -3,6 +3,7 @@ import { TextField, Fade, MenuItem,  Button, CircularProgress } from '@material-
 
 import { useDB } from '../../db/dbContext.dexie';
 import Papa from 'papaparse'
+const uuid = require('uuid/v4');
 export function readJSONFileAsync(file) {
     return new Promise((resolve, reject) => {
         let reader = new FileReader();
@@ -59,7 +60,8 @@ export const DataIngestor = (props) => {
     const handleSubmit = () => {
         setLoading(true)
         const formtedData = data.map((x, id) => ({
-            content: x[textField]
+            content: x[textField],
+            id:uuid()
         }))
         db.addDocsBatch(formtedData)
         .then(()=>setLoading(false))
