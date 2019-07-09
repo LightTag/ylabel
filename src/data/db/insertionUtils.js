@@ -7,7 +7,6 @@ import { getTrigramsCount } from "./tokenizationUtils";
 */
 
 export const updateDFTableAfterInsert =async ()=>{
-    debugger;
     const inTable = (await  dfTable.toCollection().primaryKeys());
     let notInTable = await postingsTable.where("trigram").noneOf(inTable).primaryKeys() //This is still super slow
     const step =1000;

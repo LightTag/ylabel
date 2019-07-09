@@ -79,7 +79,7 @@ export const search = async (query, params) => {
     if (query === undefined || query === null || query.length === 0) {
         candidateDocIds = await dataTable.toCollection().primaryKeys()
     } else {
-        const terms = getTrigrams(query)
+        const terms = Object.keys(getTrigramsCount(query));
         candidateDocIds = await searchForTrigrams(terms);
     }
     let result
