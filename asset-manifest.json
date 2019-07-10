@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/ylabel/static/css/main.34de6062.chunk.css",
-    "main.js": "/ylabel/static/js/main.752ca64c.chunk.js",
-    "main.js.map": "/ylabel/static/js/main.752ca64c.chunk.js.map",
+    "main.js": "/ylabel/static/js/main.cb828422.chunk.js",
+    "main.js.map": "/ylabel/static/js/main.cb828422.chunk.js.map",
     "runtime~main.js": "/ylabel/static/js/runtime~main.1da28183.js",
     "runtime~main.js.map": "/ylabel/static/js/runtime~main.1da28183.js.map",
-    "static/js/2.a6b15561.chunk.js": "/ylabel/static/js/2.a6b15561.chunk.js",
-    "static/js/2.a6b15561.chunk.js.map": "/ylabel/static/js/2.a6b15561.chunk.js.map",
+    "static/js/2.d0154e47.chunk.js": "/ylabel/static/js/2.d0154e47.chunk.js",
+    "static/js/2.d0154e47.chunk.js.map": "/ylabel/static/js/2.d0154e47.chunk.js.map",
     "index.html": "/ylabel/index.html",
-    "precache-manifest.b3fe7a64af0a27da62b747834081bf3f.js": "/ylabel/precache-manifest.b3fe7a64af0a27da62b747834081bf3f.js",
+    "precache-manifest.4f7b2e1d1052b0e19031cbd4d5316dd0.js": "/ylabel/precache-manifest.4f7b2e1d1052b0e19031cbd4d5316dd0.js",
     "service-worker.js": "/ylabel/service-worker.js",
     "static/css/main.34de6062.chunk.css.map": "/ylabel/static/css/main.34de6062.chunk.css.map"
   }
