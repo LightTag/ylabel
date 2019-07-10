@@ -63,6 +63,7 @@ export const DataIngestor = (props) => {
             content: x[textField],
             id:uuid()
         }))
+        debugger;
         db.addDocsBatch(formtedData)
         .then(()=>setLoading(false))
         ;

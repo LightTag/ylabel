@@ -9,24 +9,25 @@ import Dexie from 'dexie'
 import { getTrigrams, getTrigramsCount } from './tokenizationUtils';
 import { searchForTrigrams } from './queryFunctions';
 import { LABEL_FILTER_OPTIONS } from '../searchContext';
-import { updateDFTableAfterInsert, addDocsToStore } from './insertionUtils';
+import { updateDFTableAfterInsert, addDocsToStore, enqueTermsToBePosted, moveNewTermsFromPostingsQueueToPostingsTable, appendDocsFromQueueToExistingPostingsItems } from './insertionUtils';
 var hash = require('object-hash');
 
 const DBNAME = 'DATA'
 export const DATA_SCHEMA = 'data'
 export const POSTINGS_SCHEMA = 'positings'
 export const DF_SCHEMA = 'document_frequency'; // Stores how many documents each trigram appeared in 
+export const POSTING_QUEUE_SCHEMA = 'postings_queue'
 const CLASS_SCHEMA = 'schema'
 const QUERY_SCHEMA = 'query'
 var db = new Dexie(DBNAME);
 const stores = {}
-stores[POSTINGS_SCHEMA] = "[trigram+docId],trigram" // term,doc_id, frequency
+stores[POSTINGS_SCHEMA] = "trigram" // term,doc_id, maps each token to an object of (docId:freq)
 
 stores[DATA_SCHEMA] = "id,human_label,model_label,[has_label+id]" // and content,class
-
 stores[CLASS_SCHEMA] = "++id,name"
 stores[QUERY_SCHEMA] = "++id,*docIds"
 stores[DF_SCHEMA] = "trigram,[trigram+freq]" // compund index lets us filter and sort for least frequent df
+stores[POSTING_QUEUE_SCHEMA] ="trigram,added,newTerm" // Maps each trigram to doc ids that need to be added to the postings list
 
 
 
@@ -50,27 +51,35 @@ initializeDB()
 export const dataTable = db[DATA_SCHEMA]
 export const postingsTable = db[POSTINGS_SCHEMA];
 export const dfTable = db[DF_SCHEMA];
+export const postingsQueueTable = db[POSTING_QUEUE_SCHEMA];
 
-export const addData = async (data, index = 0) => {
+export const addData = async (data)=>{
+    await db.transaction('rw',[DATA_SCHEMA,DF_SCHEMA,POSTING_QUEUE_SCHEMA,POSTINGS_SCHEMA],async tx=>{
 
-    const step = 10000
-    if (data.length <= 0) {
-        return updateDFTableAfterInsert();
+        //First we enque all the terms to be added to the posting list
+        await enqueTermsToBePosted(data);
+        const step = 10000
+        for (let i=0; i<data.length; i+=step){
+            await addDocsToStore(data.slice(i, i+step))
+        
+        }
+        // Now we can add the actual data
 
-    }
-    var startDate = new Date();
+        //Now we update the DF table
+        // return updateDFTableAfterInsert();
 
-    return addDocsToStore(data.slice(0, step))
-        .then(() => {
-            var endDate = new Date();
-            console.log(`Inserted ${step} docs in ${endDate - startDate} ms`)
+        //And then move the queed terms into the postings table
+    });
 
-        })
-
-        .then(() => {
-            return addData(data.slice(step, data.length))
-        })
-
+    //Now a new transaction to move the data into the postings and df table
+        let t1 = new Date()
+        await moveNewTermsFromPostingsQueueToPostingsTable(db)
+        let t2 = new Date ()
+        console.log(`Moved from que to postings table in ${t2-t1} ms`)
+        t1 = new Date()
+        await appendDocsFromQueueToExistingPostingsItems(db);
+        t2 = new Date ()
+        console.log(`Appeneded docs to posting from queue in ${t2-t1} ms`)
 }
 
 
@@ -83,6 +92,7 @@ export const search = async (query, params) => {
         candidateDocIds = await searchForTrigrams(terms);
     }
     let result
+    debugger;
     switch (params.labelFilter) {
         case LABEL_FILTER_OPTIONS.ALL:
             result = dataTable.where("id").anyOf(candidateDocIds)

@@ -1,4 +1,4 @@
-import { postingsTable, dfTable } from "./dexiewDB";
+import { postingsTable, dfTable, postingsQueueTable } from "./dexiewDB";
 import Dexie from "dexie";
 /**
  * Searches the postings index for a trigram, possibly restricted to a set of document ids.  
@@ -11,25 +11,18 @@ export const searchForTrigram = async (trigram,docIds=[])=>{
         Given a trigram and 
     */
     let keys ;
-    if (docIds.length===0){
+    
         //If only a trigram was provided
-        keys = await postingsTable.where(`[trigram+docId]`)
-        .between(
-            [trigram,Dexie.minKey],
-            [trigram,Dexie.maxKey],
-        ).primaryKeys()
-    }else{
-        keys = await postingsTable.where(`[trigram+docId]`)
-        .anyOf(docIds.map(docId=>[trigram,docId]))
-        .primaryKeys()
-    }
+        keys = await postingsTable.get(trigram)
+        debugger;
+        return keys.docs;
     
     //Keys is an array of primary keys of the posting table. The PK is [term,docId]
     // Since we searched for one trigram, each docId is unique, so it's enough to reduce 
-    return keys.reduce((docIds,[term,docId])=>{
-        docIds.push(docId)
-        return docIds
-    },[]);
+    // return keys.reduce((docIds,[term,docId])=>{
+    //     docIds.push(docId)
+    //     return docIds
+    // },[]);
 
 }
 /**
@@ -59,6 +52,7 @@ export const  searchForTrigrams = async (trigrams,docIds=[]) =>{
     
     //We just started, sort the trigrams by df so that we query by least frequent. 
     const previousTrigramCount = trigrams.length
+    debugger;
     trigrams = await sortTrigramsByDF(trigrams)
     trigrams = trigrams.map(x=>x.trigram);
     if (trigrams.length < previousTrigramCount || trigrams.length ===0){
@@ -72,7 +66,7 @@ export const  searchForTrigrams = async (trigrams,docIds=[]) =>{
         docIds = await searchForTrigram(trigram,docIds)
     } while (docIds.length>0 && trigrams.length >0)
     
-    return docIds;
+    return docIds.map(x=>x.id);
     
 
 }
