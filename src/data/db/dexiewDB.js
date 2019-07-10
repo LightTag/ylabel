@@ -92,7 +92,6 @@ export const search = async (query, params) => {
         candidateDocIds = await searchForTrigrams(terms);
     }
     let result
-    debugger;
     switch (params.labelFilter) {
         case LABEL_FILTER_OPTIONS.ALL:
             result = dataTable.where("id").anyOf(candidateDocIds)
@@ -103,7 +102,6 @@ export const search = async (query, params) => {
         case LABEL_FILTER_OPTIONS.UNLABELED:
 
             const idsToExclude = new Set(await dataTable.where('[has_label+id]').anyOf(candidateDocIds.map(id => [1, id])).primaryKeys())
-            debugger;
             const idsToGet = candidateDocIds.filter(x => !idsToExclude.has(x))
             result = dataTable.where("id").anyOf(idsToGet)
             break

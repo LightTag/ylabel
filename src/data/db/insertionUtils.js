@@ -98,7 +98,6 @@ export const enqueTermsToBePosted = async (docs) => {
 
 }
 export const addDocsToStore = async (docs) => {
-    debugger;
     let t1 = new Date()
     await dataTable.bulkAdd(docs);
     let t2 = new Date()
@@ -116,54 +115,72 @@ export const addDocsToStore = async (docs) => {
 }
 
 export const moveNewTermsFromPostingsQueueToPostingsTable = async (db) => {
-    const terms = await postingsQueueTable.where("newTerm").equals(1).toArray()
     const step = 1000;
-    for (let i = 0; i < terms.length; i += step) {
+    let collection = postingsQueueTable.where("newTerm").equals(1).limit(step)
+    let terms = await collection.toArray()
+    debugger;
+
+    while (terms.length > 0) {
         await db.transaction('rw', [DF_SCHEMA, POSTING_QUEUE_SCHEMA, POSTINGS_SCHEMA], async tx => {
-            const currentSet = terms.slice(i,i+step);
-            const insertResults = await postingsTable.bulkAdd(currentSet)
-            await dfTable.bulkAdd(currentSet.map(x=>({trigram:x.trigram,freq: x.docs.length})))
-            await postingsQueueTable.where("trigram").anyOf(terms.map(x => x.trigram)).delete()
-            
+            let t1 = new Date()
+            const insertResults = await postingsTable.bulkAdd(terms)
+            await dfTable.bulkAdd(terms.map(x => ({ trigram: x.trigram, freq: x.docs.length })))
+            await collection.delete()
+            collection = postingsQueueTable.where("newTerm").equals(1).limit(step)
+            terms = await collection.toArray()
+            let t2 = new Date()
+            console.log(`moved ${terms.length} items from postings que`)
+
         })
     }
 }
+const getTermsMap = (terms) => terms.reduce((map, termObj) => {
+    map[termObj.trigram] = termObj
+    return map
+}, {})
 
+const appendIngLogic = async (db)=>{
+
+}
 export const appendDocsFromQueueToExistingPostingsItems = async (db) => {
     //Get the terms that need to be updated
-    const terms = await postingsQueueTable.where("newTerm").equals(0).toArray()
-    console.log(`Got ${terms.length} terms to update in postings table`)
-    const termsMap = terms.reduce((map, termObj) => {
-        map[termObj.trigram] = termObj
-        return map
-    }, {})
+    const step = 400; //This is low because larger values give an IPC error
+    let collection = postingsQueueTable.where("newTerm").equals(0).limit(step);
 
-    const termKeys = Object.keys(termsMap);
-    const step = 1000;
+    let terms = await collection.toArray()
+    debugger;
+    console.log(`Got ${terms.length} terms to update in postings table`)
+    let termsMap = getTermsMap(terms)
+
+    let termKeys = Object.keys(termsMap);
+
     console.log(`Term map built`)
-    
-    for (let i=0; i<termKeys.length;i+=step){
+    do {
         let t1 = new Date()
-        await db.transaction('rw', [DF_SCHEMA, POSTING_QUEUE_SCHEMA, POSTINGS_SCHEMA], async tx => {
-            
-            const currentSet = termKeys.slice(i,i+step);
-            
-            await postingsTable.where("trigram").anyOf(currentSet).modify(posting => {
+            await db.transaction('rw', [DF_SCHEMA, POSTING_QUEUE_SCHEMA, POSTINGS_SCHEMA], async tx => {
+            let collection = postingsQueueTable.where("newTerm").equals(0).limit(step);
+            let terms = await collection.toArray()
+            if (terms.length ===0){
+            }
+            else{
+
+// Linter warns us about something potentially quite bad https://eslint.org/docs/rules/no-loop-func
+            await postingsTable.where("trigram").anyOf(termKeys).modify(posting => {
                 const newDocIds = termsMap[posting.trigram].docs
                 posting.docs = posting.docs.concat(newDocIds);
             })
-            await dfTable.where("trigram").anyOf(currentSet).modify(df =>{
-                
-                df.freq = df.freq+ termsMap[df.trigram].docs.length
+            await dfTable.where("trigram").anyOf(termKeys).modify(df => {
+
+                df.freq = df.freq + termsMap[df.trigram].docs.length
             })
 
-            await postingsQueueTable.where("trigram").anyOf(currentSet).delete()
+            await collection.delete()
+         
 
+            }
         })
         let t2 = new Date();
-        console.log(`Updated ${step} terms in postings table in ${t2-t1} ms`)
-    }
-    
-    console.log(`Postings table updated`)
-    await postingsQueueTable.where("newTerm").equals(0).delete()
+        console.log(`Updated ${step} terms in postings table in ${t2 - t1} ms`)
+    } while( (await postingsQueueTable.where("newTerm").equals(0).count() ) >0)
+
 }

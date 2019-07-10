@@ -14,7 +14,6 @@ export const searchForTrigram = async (trigram,docIds=[])=>{
     
         //If only a trigram was provided
         keys = await postingsTable.get(trigram)
-        debugger;
         return keys.docs;
     
     //Keys is an array of primary keys of the posting table. The PK is [term,docId]
@@ -52,7 +51,6 @@ export const  searchForTrigrams = async (trigrams,docIds=[]) =>{
     
     //We just started, sort the trigrams by df so that we query by least frequent. 
     const previousTrigramCount = trigrams.length
-    debugger;
     trigrams = await sortTrigramsByDF(trigrams)
     trigrams = trigrams.map(x=>x.trigram);
     if (trigrams.length < previousTrigramCount || trigrams.length ===0){
@@ -60,13 +58,22 @@ export const  searchForTrigrams = async (trigrams,docIds=[]) =>{
         return []
 
     }
+    let first = true;
     do {
         // Keep narrowing down the list until we are out of trigrams or the list of document ids is empty (which means there is no match)
         const trigram = trigrams.shift();
-        docIds = await searchForTrigram(trigram,docIds)
+        const foundIds = await searchForTrigram(trigram,docIds)
+        if (first){
+            docIds = foundIds.map(x=>x.id)
+        }else{
+            const foundIdsSet = new Set(foundIds.map(x=>x.id));
+            docIds = docIds.filter(id=>foundIdsSet.has(id));
+        }
+        first=false;
+
     } while (docIds.length>0 && trigrams.length >0)
     
-    return docIds.map(x=>x.id);
+    return docIds;
     
 
 }
