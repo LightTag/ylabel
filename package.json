@@ -13,7 +13,7 @@
     "random-material-color": "^1.0.5",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1",
+    "react-scripts": "5.0.1",
     "react-virtualized": "^9.20.0",
     "use-debounce": "^2.1.0",
     "uuid": "^3.3.2",
